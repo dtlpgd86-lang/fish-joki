@@ -38,18 +38,27 @@
 
       <form id="loginForm" novalidate>
         <div class="field full" style="margin-bottom:1.1rem">
+          <label>Email Admin</label>
+          <div style="position:relative">
+            <i class="fa-solid fa-envelope"
+              style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--muted-2);z-index:2"></i>
+            <input type="email" class="inp" id="loginEmail" placeholder="Email admin" style="padding-left:2.6rem"
+              autocomplete="email" required>
+          </div>
+        </div>
+        <div class="field full" style="margin-bottom:1.1rem">
           <label>Login Admin</label>
           <div style="position:relative">
             <i class="fa-solid fa-lock"
               style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--muted-2);z-index:2"></i>
-            <input type="password" class="inp" id="loginPass" placeholder="Login akan tersedia setelah setup selesai"
-              style="padding-left:2.6rem" autocomplete="current-password" disabled>
+            <input type="password" class="inp" id="loginPass" placeholder="Masukkan password admin"
+              style="padding-left:2.6rem" autocomplete="current-password" required>
           </div>
           <span class="err">Password wajib diisi.</span>
         </div>
         <div class="field full">
           <button type="submit" class="btn btn-primary btn-block" style="padding:1rem"><i
-              class="fa-solid fa-shield-halved"></i> Dashboard sedang diamankan</button>
+              class="fa-solid fa-right-to-bracket"></i> Login</button>
         </div>
       </form>
 
@@ -64,6 +73,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/data.js"></script>
   <script src="../js/script.js"></script>
 <a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">

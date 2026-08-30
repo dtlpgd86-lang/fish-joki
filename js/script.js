@@ -31,7 +31,20 @@ const getServices = (game) => {
 };
 const getFaqs = () => { const f = store.get(KEY.faq, null); return (f && f.length) ? f : FAQS; };
 const getTestis = () => { const t = store.get(KEY.testi, null); return (t && t.length) ? t : TESTIMONIALS; };
-const getOrders = () => store.get(KEY.orders, []);
+let adminOrders = [];
+const getOrders = () => PAGE === "admin" ? adminOrders : store.get(KEY.orders, []);
+const dbOrder = (row) => ({
+  id: row.id, game: row.game, gameName: row.game_name, service: row.service,
+  serviceName: row.service_name, target: row.target, username: row.username,
+  detail: row.detail, priority: row.priority, priorityKey: row.priority_key,
+  price: row.price, est: row.est, status: row.status,
+  createdAt: row.created_at, updatedAt: row.updated_at,
+});
+async function refreshAdminOrders() {
+  const { data, error } = await supabaseClient.from("orders").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  adminOrders = data.map(dbOrder);
+}
 
 /* ---------- Toast notification ---------- */
 function toast(msg, type = "ok", ms = 3800) {
@@ -739,14 +752,21 @@ function initStatusPage() {
    ================================================================= */
 function initAdminLogin() {
   const form = $("#loginForm"); if (!form) return;
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    toast("Dashboard sedang diamankan. Login akan aktif setelah Supabase terpasang.", "info");
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: $("#loginEmail").value.trim(), password: $("#loginPass").value,
+    });
+    if (error) { toast("Email atau password admin salah.", "err"); return; }
+    location.href = "dashboard.html";
   });
-  // isi data contoh bila belum ada (agar dashboard tidak kosong)
 }
-function guardAdmin() {
-  location.replace("login.html");
+async function guardAdmin() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) { location.replace("login.html"); return false; }
+  const { data } = await supabaseClient.from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
+  if (!data) { await supabaseClient.auth.signOut(); location.replace("login.html"); return false; }
+  return true;
 }
 
 /* =================================================================
@@ -801,21 +821,25 @@ function renderOrdersTable() {
   bindDelOrders();
 }
 function bindStatusSelects() {
-  $$(".st-sel").forEach(sel => sel.addEventListener("change", () => {
+  $$(".st-sel").forEach(sel => sel.addEventListener("change", async () => {
     const orders = getOrders();
     const o = orders.find(x => x.id === sel.dataset.id);
     if (!o) return;
-    o.status = +sel.value; o.updatedAt = new Date().toISOString();
-    store.set(KEY.orders, orders);
+    const status = +sel.value;
+    const { error } = await supabaseClient.from("orders").update({ status, updated_at: new Date().toISOString() }).eq("id", o.id);
+    if (error) { toast("Status gagal diperbarui.", "err"); sel.value = o.status; return; }
+    o.status = status; o.updatedAt = new Date().toISOString();
     toast(`Status ${o.id} diupdate → ${ORDER_STATUS[o.status]}.`, "ok");
     adminStats(); renderOrdersTable();
   }));
 }
 function bindDelOrders() {
-  $$(".del-order").forEach(b => b.addEventListener("click", () => {
+  $$(".del-order").forEach(b => b.addEventListener("click", async () => {
     const id = b.dataset.id;
     if (!confirm("Hapus order " + id + "?")) return;
-    store.set(KEY.orders, getOrders().filter(o => o.id !== id));
+    const { error } = await supabaseClient.from("orders").delete().eq("id", id);
+    if (error) { toast("Order gagal dihapus.", "err"); return; }
+    adminOrders = adminOrders.filter(o => o.id !== id);
     toast("Order dihapus.", "ok");
     adminStats(); renderOrdersTable();
   }));
@@ -998,8 +1022,14 @@ function switchView(v) {
   }[v];
   window.scrollTo({ top: 0 });
 }
-function initAdminDashboard() {
-  guardAdmin();
+async function initAdminDashboard() {
+  if (!(await guardAdmin())) return;
+  try {
+    await refreshAdminOrders();
+  } catch (err) {
+    console.error(err);
+    toast("Order tidak dapat dimuat. Periksa konfigurasi admin.", "err");
+  }
   const sidebar = $(".sidebar"), main = $(".admin-main");
   $("#sideToggle").addEventListener("click", () => sidebar.classList.toggle("open"));
   main.addEventListener("click", (e) => { if (window.innerWidth < 1024 && sidebar.classList.contains("open") && !e.target.closest(".sidebar")) sidebar.classList.remove("open"); });
