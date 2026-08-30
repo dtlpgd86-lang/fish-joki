@@ -13,8 +13,6 @@ const APPCONFIG = {
   whatsapp: "6285212345678",                                   // nomor WhatsApp (format internasional tanpa +)
   whatsappMsg: "Halo FISH JOKI! Saya mau tanya tentang jasa joki Fisch & Fish It! 🎣",
   discord: "https://discord.gg/fishjoki",                      // link server Discord
-  /* ====== KEAMAN ADMIN ====== */
-  adminPass: "admin123",                                       // password login dashboard admin
   /* ====== ATURAN HARGA ====== */
   expressMultiplier: 1.5,                                      // harga Express = normal x 1.5
   minPrice: 10000,                                             // harga minimum order

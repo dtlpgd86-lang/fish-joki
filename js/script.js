@@ -712,23 +712,12 @@ function initAdminLogin() {
   const form = $("#loginForm"); if (!form) return;
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const pass = $("#loginPass").value;
-    if (pass === APPCONFIG.adminPass) {
-      store.set(KEY.auth, { t: Date.now() });
-      toast("Login berhasil. Selamat datang, Admin! 🐟", "ok");
-      setTimeout(() => location.href = "dashboard.html", 700);
-    } else {
-      toast("Password salah. Ulangi lagi.", "err");
-      $("#loginPass").value = "";
-      $("#loginPass").focus();
-    }
+    toast("Dashboard sedang diamankan. Login akan aktif setelah Supabase terpasang.", "info");
   });
   // isi data contoh bila belum ada (agar dashboard tidak kosong)
-  seedDemo();
 }
 function guardAdmin() {
-  const auth = store.get(KEY.auth, null);
-  if (!auth || !auth.t) location.href = "login.html";
+  location.replace("login.html");
 }
 
 /* =================================================================

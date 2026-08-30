@@ -38,24 +38,24 @@
 
       <form id="loginForm" novalidate>
         <div class="field full" style="margin-bottom:1.1rem">
-          <label>Password Admin</label>
+          <label>Login Admin</label>
           <div style="position:relative">
             <i class="fa-solid fa-lock"
               style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--muted-2);z-index:2"></i>
-            <input type="password" class="inp" id="loginPass" placeholder="Masukkan password admin"
-              style="padding-left:2.6rem" autocomplete="current-password" required>
+            <input type="password" class="inp" id="loginPass" placeholder="Login akan tersedia setelah setup selesai"
+              style="padding-left:2.6rem" autocomplete="current-password" disabled>
           </div>
           <span class="err">Password wajib diisi.</span>
         </div>
         <div class="field full">
           <button type="submit" class="btn btn-primary btn-block" style="padding:1rem"><i
-              class="fa-solid fa-right-to-bracket"></i> Login</button>
+              class="fa-solid fa-shield-halved"></i> Dashboard sedang diamankan</button>
         </div>
       </form>
 
       <div style="margin-top:1.2rem;text-align:center;font-size:.84rem;color:var(--muted-2)">
-        Default password: <b style="color:var(--cyan)">admin123</b> — ubah di <code
-          style="color:var(--gold)">js/data.js</code>
+        Login aman akan dikonfigurasi melalui <b style="color:var(--cyan)">akun admin</b> — menggunakan <code
+          style="color:var(--gold)">Supabase Auth</code>
       </div>
       <div style="text-align:center;margin-top:.6rem">
         <a href="../index.html" style="color:var(--muted);font-size:.88rem"><i class="fa-solid fa-arrow-left"></i>
