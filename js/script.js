@@ -752,6 +752,9 @@ function initStatusPage() {
    ================================================================= */
 function initAdminLogin() {
   const form = $("#loginForm"); if (!form) return;
+  const reason = new URLSearchParams(location.search).get("error");
+  if (reason === "access") toast("Akun ini belum diberi hak admin. Jalankan query admin di Supabase.", "err", 6000);
+  if (reason === "session") toast("Sesi login tidak ditemukan. Silakan login kembali.", "err");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const { error } = await supabaseClient.auth.signInWithPassword({
@@ -762,10 +765,10 @@ function initAdminLogin() {
   });
 }
 async function guardAdmin() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) { location.replace("login.html"); return false; }
-  const { data } = await supabaseClient.from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
-  if (!data) { await supabaseClient.auth.signOut(); location.replace("login.html"); return false; }
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session?.user) { location.replace("login.html?error=session"); return false; }
+  const { data, error } = await supabaseClient.from("admin_users").select("user_id", { head: false }).eq("user_id", session.user.id).maybeSingle();
+  if (error || !data) { await supabaseClient.auth.signOut(); location.replace("login.html?error=access"); return false; }
   return true;
 }
 
