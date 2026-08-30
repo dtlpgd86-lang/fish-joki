@@ -41,6 +41,7 @@ const dbOrder = (row) => ({
   createdAt: row.created_at, updatedAt: row.updated_at,
 });
 async function refreshAdminOrders() {
+  if (!supabaseClient) throw new Error("Supabase client belum tersedia.");
   const { data, error } = await supabaseClient.from("orders").select("*").order("created_at", { ascending: false });
   if (error) throw error;
   adminOrders = data.map(dbOrder);
@@ -1027,6 +1028,7 @@ function switchView(v) {
 }
 async function initAdminDashboard() {
   if (!(await guardAdmin())) return;
+  let refreshTimer;
   try {
     await refreshAdminOrders();
   } catch (err) {
@@ -1047,6 +1049,16 @@ async function initAdminDashboard() {
   switchView("dash");
   adminStats();
   renderOrdersTable();
+  refreshTimer = window.setInterval(async () => {
+    try {
+      await refreshAdminOrders();
+      adminStats();
+      renderOrdersTable();
+    } catch (err) {
+      console.error("Penyegaran order gagal:", err);
+    }
+  }, 10000);
+  window.addEventListener("pagehide", () => window.clearInterval(refreshTimer), { once: true });
   renderServicesAdmin();
   renderFaqAdmin();
   renderTestiAdmin();
