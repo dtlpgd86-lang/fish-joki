@@ -10,7 +10,7 @@ grant execute on function public.is_admin() to authenticated;
 
 drop policy if exists "public can create orders" on public.orders;
 create policy "public can create orders"
-on public.orders for insert to anon
+on public.orders for insert to anon, authenticated
 with check (status = 0 and created_at > now() - interval '5 minutes');
 
 drop policy if exists "admin can read own record" on public.admin_users;

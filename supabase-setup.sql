@@ -24,7 +24,7 @@ alter table public.orders enable row level security;
 
 -- Pelanggan hanya dapat membuat order baru; mereka tidak bisa membaca semua order.
 create policy "public can create orders"
-  on public.orders for insert to anon
+  on public.orders for insert to anon, authenticated
   with check (status = 0 and created_at > now() - interval '5 minutes');
 
 -- Status hanya dapat dibaca dengan pasangan Order ID + token pelacakan rahasia.
