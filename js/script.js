@@ -463,7 +463,8 @@ function bindOrderForm(prefix) {
       order = await createOrder(data);
     } catch (err) {
       console.error(err);
-      toast("Order belum tersimpan. Coba lagi beberapa saat.", "err");
+      const detail = err?.message ? ` (${esc(err.message)})` : "";
+      toast("Order belum tersimpan" + detail, "err", 9000);
       return;
     }
 
