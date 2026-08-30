@@ -78,6 +78,8 @@ function calcQuote(game, svcId, target, priority) {
 /* ---------- Create order ---------- */
 async function createOrder(data) {
   if (!supabaseClient) throw new Error("Koneksi database belum tersedia.");
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session?.user) throw new Error("Silakan login dengan Google terlebih dahulu.");
   const id = "FJ-" + Date.now().toString(36).toUpperCase().slice(-6);
   const trackingToken = crypto.randomUUID();
   const createdAt = new Date().toISOString();
@@ -93,6 +95,7 @@ async function createOrder(data) {
     target: order.target, username: order.username, detail: order.detail,
     priority: order.priority, priority_key: order.priorityKey, price: order.price,
     est: order.est, status: order.status, created_at: createdAt,
+    customer_id: session.user.id, customer_email: session.user.email || "",
   });
   if (error) throw error;
   return order;
@@ -443,6 +446,14 @@ function bindOrderForm(prefix) {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session?.user) {
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google", options: { redirectTo: window.location.href },
+      });
+      if (error) toast("Login Google gagal: " + esc(error.message), "err", 9000);
+      return;
+    }
     if (!validateForm(prefix)) { toast("Mohon lengkapi data yang wajib diisi dengan benar.", "err"); return; }
     const data = {
       game: gameSel.value,

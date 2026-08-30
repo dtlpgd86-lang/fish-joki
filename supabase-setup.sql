@@ -16,6 +16,8 @@ create table if not exists public.orders (
   price integer not null check (price >= 0),
   est text not null,
   status smallint not null default 0 check (status between 0 and 5),
+  customer_id uuid references auth.users(id) on delete set null,
+  customer_email text not null default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -23,9 +25,9 @@ create table if not exists public.orders (
 alter table public.orders enable row level security;
 
 -- Pelanggan hanya dapat membuat order baru; mereka tidak bisa membaca semua order.
-create policy "public can create orders"
-  on public.orders for insert to anon, authenticated
-  with check (status = 0 and created_at > now() - interval '5 minutes');
+create policy "authenticated users can create orders"
+  on public.orders for insert to authenticated
+  with check (customer_id = auth.uid() and status = 0 and created_at > now() - interval '5 minutes');
 
 -- Status hanya dapat dibaca dengan pasangan Order ID + token pelacakan rahasia.
 create or replace function public.get_order_status(p_id text, p_tracking_token uuid)
