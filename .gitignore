@@ -1,0 +1,20 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated files
+node_modules/
+dist/
+build/
+.vercel/
+
+# Local editor/system files
+.vscode/
+*.log
+
+# Temporary local QA and backup scripts
+_qa_*.mjs
+_opt.mjs
+_server.js
+_script_backup.js

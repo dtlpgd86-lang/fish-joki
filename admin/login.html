@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#020617">
+  <title>Login Admin — FISH JOKI</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body data-page="admin-login" class="admin-body">
+
+  <div class="bg-fx"></div>
+  <noscript>
+    <div class="noscript">Aktifkan JavaScript untuk mengakses dashboard.</div>
+  </noscript>
+
+  <div class="login-wrap">
+    <div class="login-card reveal in">
+      <div class="login-logo">
+        <span class="logo-mark" style="width:58px;height:58px;font-size:1.5rem"><i class="fa-solid fa-fish"></i></span>
+        <div style="text-align:center">
+          <div style="font-family:var(--font-head);font-weight:900;letter-spacing:1px;font-size:1.2rem">FISH <span
+              class="gtext">JOKI</span></div>
+          <div style="color:var(--muted);font-size:.88rem">Admin Dashboard</div>
+        </div>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field full" style="margin-bottom:1.1rem">
+          <label>Password Admin</label>
+          <div style="position:relative">
+            <i class="fa-solid fa-lock"
+              style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--muted-2);z-index:2"></i>
+            <input type="password" class="inp" id="loginPass" placeholder="Masukkan password admin"
+              style="padding-left:2.6rem" autocomplete="current-password" required>
+          </div>
+          <span class="err">Password wajib diisi.</span>
+        </div>
+        <div class="field full">
+          <button type="submit" class="btn btn-primary btn-block" style="padding:1rem"><i
+              class="fa-solid fa-right-to-bracket"></i> Login</button>
+        </div>
+      </form>
+
+      <div style="margin-top:1.2rem;text-align:center;font-size:.84rem;color:var(--muted-2)">
+        Default password: <b style="color:var(--cyan)">admin123</b> — ubah di <code
+          style="color:var(--gold)">js/data.js</code>
+      </div>
+      <div style="text-align:center;margin-top:.6rem">
+        <a href="../index.html" style="color:var(--muted);font-size:.88rem"><i class="fa-solid fa-arrow-left"></i>
+          Kembali ke Website</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/script.js"></script>
+<a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
+    <div class="wa-pulse"></div>
+    <div class="wa-banner-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    <div class="wa-banner-text">
+        <span class="wa-t">Butuh Bantuan?</span>
+        <span class="wa-s">Chat Customer Service &gt;</span>
+    </div>
+</a>
+</body>
+
+</html>

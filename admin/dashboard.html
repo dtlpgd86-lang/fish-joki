@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#020617">
+  <title>Dashboard Admin — FISH JOKI</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body data-page="admin" class="admin-body">
+
+  <div class="admin-shell">
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="sidebar">
+      <a href="../index.html" class="logo">
+        <span class="logo-mark"><i class="fa-solid fa-fish"></i></span>
+        <span>FISH <b>JOKI</b></span>
+      </a>
+      <ul class="side-nav">
+        <li><button data-view="dash" class="active"><i class="fa-solid fa-chart-pie"></i> Ringkasan</button></li>
+        <li><button data-view="orders"><i class="fa-solid fa-list-check"></i> Order</button></li>
+        <li><button data-view="services"><i class="fa-solid fa-tags"></i> Layanan &amp; Harga</button></li>
+        <li><button data-view="faq"><i class="fa-solid fa-circle-question"></i> FAQ</button></li>
+        <li><button data-view="testi"><i class="fa-solid fa-star"></i> Testimoni</button></li>
+      </ul>
+      <div class="side-foot">
+        <a href="../index.html" class="side-link"><i class="fa-solid fa-globe"></i> Lihat Website</a>
+        <button id="logoutBtn"
+          style="display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;border-radius:12px;background:none;border:1px solid var(--stroke);color:var(--red);font-weight:700"><i
+            class="fa-solid fa-right-from-bracket"></i> Keluar</button>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="admin-main">
+      <div class="a-top">
+        <div style="display:flex;align-items:center;gap:.8rem">
+          <button id="sideToggle" class="side-toggle" aria-label="Buka menu"><i class="fa-solid fa-bars"></i></button>
+          <h2 id="viewTitle">Ringkasan Dashboard</h2>
+        </div>
+        <button id="resetData" class="btn btn-ghost btn-sm"><i class="fa-solid fa-rotate-left"></i> Reset ke
+          Default</button>
+      </div>
+
+      <!-- VIEW: Ringkasan -->
+      <div class="a-view" id="view-dash">
+        <div class="stat-grid" id="statGrid"></div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--cyan)"></i> Order Terbaru</h3>
+            <button class="btn btn-ghost btn-sm" onclick="switchView('orders')">Lihat Semua <i
+                class="fa-solid fa-arrow-right"></i></button>
+          </div>
+          <div class="table-wrap">
+            <table class="a-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Game / Layanan</th>
+                  <th>Target</th>
+                  <th>User</th>
+                  <th>Harga</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="dashRecent"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: Order -->
+      <div class="a-view hidden" id="view-orders">
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-list-check" style="color:var(--cyan)"></i> Daftar Order</h3><span
+              style="color:var(--muted);font-size:.9rem">Update status langsung dari dropdown.</span>
+          </div>
+          <div class="table-wrap">
+            <table class="a-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Game / Layanan</th>
+                  <th>Target</th>
+                  <th>User</th>
+                  <th>Harga</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: Layanan & Harga -->
+      <div class="a-view hidden" id="view-services">
+        <div id="svcAdminList"></div>
+      </div>
+
+      <!-- VIEW: FAQ -->
+      <div class="a-view hidden" id="view-faq">
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-circle-question" style="color:var(--cyan)"></i> Kelola FAQ</h3>
+            <button class="btn btn-primary btn-sm"
+              onclick="editFaqIdx=null;$('#faqModalTitle').textContent='Tambah FAQ';$('#faqForm').reset();$('#faqModal').classList.add('open');document.body.style.overflow='hidden'"><i
+                class="fa-solid fa-plus"></i> Tambah FAQ</button>
+          </div>
+          <div class="table-wrap">
+            <table class="a-table" style="min-width:760px">
+              <thead>
+                <tr>
+                  <th>Pertanyaan</th>
+                  <th>Jawaban</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="faqAdminList"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: Testimoni -->
+      <div class="a-view hidden" id="view-testi">
+        <div class="panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-star" style="color:var(--cyan)"></i> Kelola Testimoni</h3>
+            <button class="btn btn-primary btn-sm"
+              onclick="editTestiIdx=null;$('#testiModalTitle').textContent='Tambah Testimoni';$('#testiForm').reset();$('#testiGame').value='fisch';$('#testiModal').classList.add('open');document.body.style.overflow='hidden'"><i
+                class="fa-solid fa-plus"></i> Tambah Testimoni</button>
+          </div>
+          <div class="table-wrap">
+            <table class="a-table" style="min-width:820px">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Username</th>
+                  <th>Game</th>
+                  <th>Rating</th>
+                  <th>Review</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="testiAdminList"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div> <!-- ============ MODAL: Layanan ============ -->
+ <div class="modal" id="svcModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="svcModalTitle">Tambah Layanan</h3>
+        <button class="modal-x" data-close="svcModal"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal-body">
+        <form id="svcForm" class="form-grid" novalidate>
+          <div class="field">
+            <label>Game<b>*</b></label>
+            <select class="sel" id="svcGame">
+              <option value="fisch">Fisch</option>
+              <option value="fishit">Fish It!</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nama Layanan<b>*</b></label>
+            <input class="inp" id="svcName" placeholder="Contoh: Farming Bait" required>
+          </div>
+          <div class="field">
+            <label>Ikon Font Awesome</label>
+            <input class="inp" id="svcIcon" placeholder="fa-fish (tanpa fa-solid)">
+          </div>
+          <div class="field">
+            <label>Estimasi Waktu<b>*</b></label>
+            <input class="inp" id="svcEst" placeholder="Contoh: 1–3 Hari" required>
+          </div>
+          <div class="field full">
+            <label>Deskripsi<b>*</b></label>
+            <textarea class="area" id="svcDesc" placeholder="Deskripsi singkat layanan" required></textarea>
+          </div>
+          <div class="field full">
+            <label>Harga Mulai (Rp)<b>*</b></label>
+            <input type="number" class="inp" id="svcPrice" min="5000" step="5000" placeholder="15000" required>
+          </div>
+          <div class="field full">
+            <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-floppy-disk"></i> Simpan Layanan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+ </div>
+
+ <!-- ============ MODAL: FAQ ============ -->
+ <div class="modal" id="faqModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="faqModalTitle">Tambah FAQ</h3>
+        <button class="modal-x" data-close="faqModal"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal-body">
+        <form id="faqForm" class="form-grid" novalidate>
+          <div class="field full">
+            <label>Pertanyaan<b>*</b></label>
+            <input class="inp" id="faqQ" required>
+          </div>
+          <div class="field full">
+            <label>Jawaban<b>*</b></label>
+            <textarea class="area" id="faqA" style="min-height:130px" required></textarea>
+          </div>
+          <div class="field full">
+            <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-floppy-disk"></i> Simpan FAQ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+ </div>
+
+ <!-- ============ MODAL: Testimoni ============ -->
+ <div class="modal" id="testiModal">
+    <div class="modal-card">
+      <div class="modal-head"><h3 id="testiModalTitle">Tambah Testimoni</h3>
+        <button class="modal-x" data-close="testiModal"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal-body">
+        <form id="testiForm" class="form-grid" novalidate>
+          <div class="field">
+            <label>Username<b>*</b></label>
+            <input class="inp" id="testiName" required>
+          </div>
+          <div class="field">
+            <label>Game<b>*</b></label>
+            <select class="sel" id="testiGame">
+              <option value="fisch">Fisch</option>
+              <option value="fishit">Fish It!</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Rating (1–5)<b>*</b></label>
+            <select class="sel" id="testiStar">
+              <option value="5">★★★★★</option>
+              <option value="4">★★★★</option>
+              <option value="3">★★★</option>
+              <option value="2">★★</option>
+              <option value="1">★</option>
+            </select>
+          </div>
+          <div class="field">
+            <label></label>
+          </div>
+          <div class="field full">
+            <label>Review<b>*</b></label>
+            <textarea class="area" id="testiReview" required></textarea>
+          </div>
+          <div class="field full">
+            <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-floppy-disk"></i> Simpan Testimoni</button>
+          </div>
+        </form>
+      </div>
+    </div>
+ </div>
+
+ <script src="../js/data.js"></script>
+ <script src="../js/script.js"></script>
+<a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
+    <div class="wa-pulse"></div>
+    <div class="wa-banner-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    <div class="wa-banner-text">
+        <span class="wa-t">Butuh Bantuan?</span>
+        <span class="wa-s">Chat Customer Service &gt;</span>
+    </div>
+</a>
+</body>
+</html>

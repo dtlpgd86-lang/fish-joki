@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="FAQ jasa joki Fisch & Fish It! — durasi pengerjaan, keamanan akun, password, status order, hingga cara pembayaran.">
+  <meta name="theme-color" content="#020617">
+  <title>FAQ — FISH JOKI</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-page="faq">
+
+  <div class="loader" id="loader">
+    <div class="loader-fish">🐟</div>
+    <div class="loader-bar"><i></i></div>
+    <div class="loader-text">FISH JOKI — Menyiapkan Laut 🎣</div>
+  </div>
+  <noscript>
+    <div class="noscript">Aktifkan JavaScript untuk pengalaman terbaik di FISH JOKI.</div>
+  </noscript>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="crumbs reveal"><a href="index.html">Home</a> <i class="fa-solid fa-chevron-right"></i>
+          <span>FAQ</span></div>
+        <h1 class="reveal d1">Pertanyaan <span class="gtext">Umum</span></h1>
+        <p class="reveal d2">Semua yang perlu kamu tahu sebelum order. Masih ragu? Customer service kami siap membantu
+          🎣</p>
+      </div>
+    </section>
+
+    <section style="padding-top:8px">
+      <div class="container">
+        <div class="faq-list" id="faqList"></div>
+
+        <div class="cta-card reveal" style="margin-top:4rem">
+          <h2>Masih Ada Pertanyaan?</h2>
+          <p>Jangan ragu untuk menghubungi customer service — fast response setiap hari 09.00–23.00 WIB.</p>
+          <div class="cta-btns">
+            <a href="#" id="waBtn3" class="btn btn-success" target="_blank" rel="noopener"><i
+                class="fa-brands fa-whatsapp"></i> Chat WhatsApp</a>
+            <a href="#" id="dcBtn3" class="btn btn-discord" target="_blank" rel="noopener"><i
+                class="fa-brands fa-discord"></i> Chat Discord</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var wa = document.getElementById("waBtn3");
+      var dc = document.getElementById("dcBtn3");
+      if (wa) wa.href = waLink();
+      if (dc) dc.href = APPCONFIG.discord;
+    });
+  </script>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+<a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
+    <div class="wa-pulse"></div>
+    <div class="wa-banner-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    <div class="wa-banner-text">
+        <span class="wa-t">Butuh Bantuan?</span>
+        <span class="wa-s">Chat Customer Service &gt;</span>
+    </div>
+</a>
+</body>
+
+</html>
