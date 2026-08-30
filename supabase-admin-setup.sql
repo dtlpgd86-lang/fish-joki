@@ -8,6 +8,11 @@ returns boolean language sql security definer set search_path = public
 as $$ select exists (select 1 from public.admin_users where user_id = auth.uid()); $$;
 grant execute on function public.is_admin() to authenticated;
 
+drop policy if exists "public can create orders" on public.orders;
+create policy "public can create orders"
+on public.orders for insert to anon
+with check (status = 0 and created_at > now() - interval '5 minutes');
+
 drop policy if exists "admin can read own record" on public.admin_users;
 create policy "admin can read own record" on public.admin_users for select to authenticated using (user_id = auth.uid());
 

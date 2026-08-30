@@ -80,10 +80,11 @@ async function createOrder(data) {
   if (!supabaseClient) throw new Error("Koneksi database belum tersedia.");
   const id = "FJ-" + Date.now().toString(36).toUpperCase().slice(-6);
   const trackingToken = crypto.randomUUID();
+  const createdAt = new Date().toISOString();
   const order = {
     id, ...data,
     status: 0,
-    createdAt: new Date().toISOString(),
+    createdAt,
     updatedAt: new Date().toISOString(), trackingToken,
   };
   const { error } = await supabaseClient.from("orders").insert({
@@ -91,7 +92,7 @@ async function createOrder(data) {
     game_name: order.gameName, service: order.service, service_name: order.serviceName,
     target: order.target, username: order.username, detail: order.detail,
     priority: order.priority, priority_key: order.priorityKey, price: order.price,
-    est: order.est, status: order.status,
+    est: order.est, status: order.status, created_at: createdAt,
   });
   if (error) throw error;
   return order;
