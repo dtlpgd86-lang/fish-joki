@@ -44,8 +44,9 @@
     <section style="padding-top:4px">
       <div class="container">
         <form class="status-search" id="statusForm" novalidate>
-          <div class="search-box reveal">
+          <div class="search-box reveal" style="flex-wrap:wrap">
             <input class="inp" id="statusId" placeholder="Contoh: FJ-DEMO01" style="flex:1" required>
+            <input class="inp" id="statusToken" placeholder="Token dari tautan status" style="flex:2;min-width:220px" required>
             <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Cek
               Sekarang</button>
           </div>
@@ -77,6 +78,7 @@
       if (dc) dc.href = APPCONFIG.discord;
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/data.js"></script>
   <script src="js/script.js"></script>
 <a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">

@@ -23,6 +23,11 @@ const APPCONFIG = {
   noteLangka: "Harga menyesuaikan tingkat kesulitan & lama pengerjaan target ikan langka.",
 };
 
+const SUPABASE_CONFIG = {
+  url: "https://wlejczjcnyypkoycjzvv.supabase.co",
+  publishableKey: "sb_publishable_bR2qiLpbPlhiWXbk2n6SyQ_rLdeEkNU",
+};
+
 /* ============ DAFTAR GAME ============ */
 const GAMES_META = {
   fisch: { name: "Fisch", icon: "fa-fish", chip: "chip-fisch" },

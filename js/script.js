@@ -19,6 +19,10 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
   del(k) { localStorage.removeItem(k); },
 };
+const supabaseClient = window.supabase?.createClient(
+  SUPABASE_CONFIG.url,
+  SUPABASE_CONFIG.publishableKey,
+);
 
 /* ---------- Data dengan override admin ---------- */
 const getServices = (game) => {
@@ -58,17 +62,24 @@ function calcQuote(game, svcId, target, priority) {
 }
 
 /* ---------- Create order ---------- */
-function createOrder(data) {
+async function createOrder(data) {
+  if (!supabaseClient) throw new Error("Koneksi database belum tersedia.");
   const id = "FJ-" + Date.now().toString(36).toUpperCase().slice(-6);
+  const trackingToken = crypto.randomUUID();
   const order = {
     id, ...data,
     status: 0,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(), trackingToken,
   };
-  const orders = getOrders();
-  orders.unshift(order);
-  store.set(KEY.orders, orders);
+  const { error } = await supabaseClient.from("orders").insert({
+    id: order.id, tracking_token: trackingToken, game: order.game,
+    game_name: order.gameName, service: order.service, service_name: order.serviceName,
+    target: order.target, username: order.username, detail: order.detail,
+    priority: order.priority, priority_key: order.priorityKey, price: order.price,
+    est: order.est, status: order.status,
+  });
+  if (error) throw error;
   return order;
 }
 const findOrder = (id) => getOrders().find(o => String(o.id).toLowerCase() === String(id).trim().toLowerCase());
@@ -415,7 +426,7 @@ function bindOrderForm(prefix) {
     });
   });
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validateForm(prefix)) { toast("Mohon lengkapi data yang wajib diisi dengan benar.", "err"); return; }
     const data = {
@@ -432,7 +443,14 @@ function bindOrderForm(prefix) {
     const quote = calcQuote(data.game, data.service, data.target, data.priorityKey);
     data.price = quote.price;
     data.est = quote.time;
-    const order = createOrder(data);
+    let order;
+    try {
+      order = await createOrder(data);
+    } catch (err) {
+      console.error(err);
+      toast("Order belum tersimpan. Coba lagi beberapa saat.", "err");
+      return;
+    }
 
     const modal = $("#orderModal");
     if (modal) { modal.classList.remove("open"); document.body.style.overflow = ""; }
@@ -474,7 +492,7 @@ function showSuccess(order) {
           <div style="font-family:var(--font-head);font-size:1.6rem;font-weight:900;letter-spacing:2px;background:linear-gradient(120deg,#00d4ff,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent;margin:.8rem 0" id="succId"></div>
           <p style="color:var(--muted);font-size:.93rem">Instruksi pembayaran akan dikirim ke Customer Service.<br>Pembayaran: <b style="color:var(--gold)">${esc(APPCONFIG.acceptedPayments)}</b></p>
           <div class="prio-grid" style="margin-top:1.2rem">
-            <a href="status.html?id=${order.id}" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Cek Status</a>
+            <a href="status.html?id=${order.id}&token=${order.trackingToken}" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Cek Status</a>
             <a href="#" class="btn btn-ghost" data-close="successModal">Tutup</a>
           </div>
         </div>
@@ -657,10 +675,21 @@ function statusTimelineHTML(status) {
     : "";
   return `<div class="tl">${html}${cancel}</div>`;
 }
-function renderStatus(id) {
-  const order = findOrder(id);
+async function renderStatus(id, token) {
   const card = $("#statusCard");
   card.classList.remove("show");
+  if (!supabaseClient || !token) {
+    $("#statusBody").innerHTML = `<div class="empty"><i class="fa-solid fa-key"></i>Gunakan tautan status yang diberikan setelah order dibuat.</div>`;
+    card.classList.add("show");
+    return;
+  }
+  const { data, error } = await supabaseClient.rpc("get_order_status", { p_id: id, p_tracking_token: token });
+  const row = !error && data && data[0];
+  const order = row && {
+    id: row.id, gameName: row.game_name, serviceName: row.service_name, target: row.target,
+    priority: row.priority, price: row.price, est: row.est, status: row.status,
+    createdAt: row.created_at, updatedAt: row.updated_at,
+  };
   if (!order) {
     $("#statusBody").innerHTML = `
       <div class="empty"><i class="fa-solid fa-fish"></i>Order ID <b style="color:var(--cyan)">${esc(id)}</b> tidak ditemukan.<br>
@@ -669,7 +698,7 @@ function renderStatus(id) {
     return;
   }
   const s = order.status;
-  const meta = GAMES_META[order.game];
+  const meta = Object.values(GAMES_META).find(x => x.name === order.gameName) || GAMES_META.fisch;
   $("#statusBody").innerHTML = `
     <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between">
       <div>
@@ -682,7 +711,6 @@ function renderStatus(id) {
       <div class="detail-cell"><div class="k">Game</div><div class="v"><span class="game-chip ${meta.chip}"><i class="fa-solid ${meta.icon}"></i>${meta.name}</span></div></div>
       <div class="detail-cell"><div class="k">Layanan</div><div class="v">${esc(order.serviceName)}</div></div>
       <div class="detail-cell"><div class="k">Target</div><div class="v">${esc(order.target)}</div></div>
-      <div class="detail-cell"><div class="k">Username Roblox</div><div class="v">${esc(order.username)}</div></div>
       <div class="detail-cell"><div class="k">Prioritas</div><div class="v">${esc(order.priority)}</div></div>
       <div class="detail-cell"><div class="k">Estimasi Harga</div><div class="v" style="color:var(--cyan)">${fmtR(order.price)}</div></div>
     </div>
@@ -700,10 +728,11 @@ function initStatusPage() {
     e.preventDefault();
     const id = $("#statusId").value.trim();
     if (!id) { toast("Masukkan Order ID terlebih dahulu.", "err"); return; }
-    renderStatus(id);
+    renderStatus(id, $("#statusToken").value.trim());
   });
-  const url = new URLSearchParams(location.search).get("id");
-  if (url) { $("#statusId").value = url; renderStatus(url); }
+  const params = new URLSearchParams(location.search);
+  const url = params.get("id"), token = params.get("token");
+  if (url && token) { $("#statusId").value = url; $("#statusToken").value = token; renderStatus(url, token); }
 }
 /* =================================================================
    ADMIN — Login
