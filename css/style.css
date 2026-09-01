@@ -563,6 +563,16 @@ section.alt{background:linear-gradient(180deg,transparent,rgba(10,21,51,.5),tran
 .cancel-banner{margin-top:1.4rem;padding:1rem 1.2rem;border-radius:14px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:#fca5a5;display:flex;gap:.8rem;align-items:center}
 .pay-note{margin-top:1.1rem;font-size:.9rem;color:var(--muted);background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);border-radius:13px;padding:.85rem 1rem}
 .pay-note b{color:var(--gold)}
+.rating-panel{margin-top:1.1rem;padding:1rem;border:1px solid rgba(251,191,36,.3);border-radius:14px;background:rgba(251,191,36,.06)}
+.rating-heading{display:flex;gap:.7rem;align-items:flex-start;color:var(--gold)}
+.rating-heading span{color:var(--text)}.rating-heading small{display:block;color:var(--muted);margin-top:.2rem}.rating-heading strong{color:var(--gold)}
+.rating-stars{display:flex;gap:.35rem;margin:.8rem 0}.rating-star{border:0;background:transparent;color:var(--muted-2);font-size:1.45rem;padding:.15rem;cursor:pointer}.rating-star.on{color:var(--gold)}
+.rating-panel .area{min-height:72px;margin-bottom:.7rem}.rating-panel.submitted{border-color:rgba(52,211,153,.35);color:#a7f3d0;display:flex;gap:.7rem;align-items:center}.rating-panel.expired{color:var(--muted);display:flex;gap:.7rem;align-items:center}
+.order-chat{margin-top:1.1rem;border:1px solid rgba(0,212,255,.28);border-radius:14px;background:rgba(0,212,255,.04);overflow:hidden}
+.chat-head{display:flex;justify-content:space-between;gap:.8rem;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--stroke);color:var(--cyan);font-weight:700}.chat-head small{font-size:.75rem;color:var(--muted)}
+.chat-list{height:250px;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.65rem}.chat-empty{margin:auto;color:var(--muted);font-size:.9rem;text-align:center}
+.chat-message{align-self:flex-start;max-width:84%;padding:.55rem .75rem;border-radius:12px 12px 12px 3px;background:rgba(148,163,184,.12);color:var(--text);line-height:1.4;word-break:break-word}.chat-message.own{align-self:flex-end;border-radius:12px 12px 3px 12px;background:rgba(0,212,255,.16)}.chat-message small{display:block;margin-bottom:.18rem;color:var(--muted-2);font-size:.7rem}
+.chat-form{display:flex;gap:.6rem;align-items:end;padding:.8rem;border-top:1px solid var(--stroke)}.chat-form .area{min-height:44px;max-height:100px;flex:1}.chat-form .btn{flex-shrink:0}
 /* ---------- Admin ---------- */
 .admin-body{background:var(--bg-0)}
 .admin-body::before{content:none}

@@ -38,7 +38,7 @@ const dbOrder = (row) => ({
   serviceName: row.service_name, target: row.target, username: row.username,
   detail: row.detail, priority: row.priority, priorityKey: row.priority_key,
   price: row.price, est: row.est, status: row.status,
-  createdAt: row.created_at, updatedAt: row.updated_at,
+  createdAt: row.created_at, updatedAt: row.updated_at, trackingToken: row.tracking_token,
 });
 async function refreshAdminOrders() {
   if (!supabaseClient) throw new Error("Supabase client belum tersedia.");
@@ -265,7 +265,7 @@ function observeReveals() {
   els.forEach(e => io.observe(e));
 }
 function initCounters() {
-  const els = $$("[data-count]");
+  const els = $$("[data-count]:not([data-live-stat])");
   const io = new IntersectionObserver((entries) => {
     entries.forEach(en => {
       if (!en.isIntersecting) return;
@@ -295,11 +295,35 @@ function renderStats() {
     <div class="stat-card reveal d${i}">
       ${s.fast
         ? `<div class="stat-num" style="font-size:1.7rem">⚡</div>`
-        : `<div class="stat-num" data-count="${s.num}" data-suffix="${esc(s.suffix)}">0</div>`}
+        : `<div class="stat-num" ${i < 2 ? `data-live-stat="${i === 0 ? "completed_orders" : "customers"}"` : ""} data-count="${s.num}" data-suffix="${esc(s.suffix)}">0</div>`}
       <div class="stat-lbl">${esc(s.label)}</div>
     </div>`).join("");
   initCounters();
   observeReveals();
+}
+let publicStatsSubscription = null;
+async function refreshPublicStats() {
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient.rpc("get_public_order_stats");
+  if (error || !data) return;
+  const stats = typeof data === "string" ? JSON.parse(data) : data;
+  ["completed_orders", "customers"].forEach(key => {
+    const el = $(`[data-live-stat="${key}"]`);
+    if (el) el.textContent = `${Number(stats[key] || 0).toLocaleString("id-ID")}+`;
+  });
+}
+function initLiveStats() {
+  refreshPublicStats();
+  if (!supabaseClient?.channel) return;
+  publicStatsSubscription = supabaseClient.channel("public-order-stats")
+    .on("broadcast", { event: "stats_updated" }, refreshPublicStats)
+    .subscribe();
+  // Cadangan jika koneksi WebSocket pelanggan sedang terputus.
+  const poller = window.setInterval(refreshPublicStats, 60000);
+  window.addEventListener("pagehide", () => {
+    window.clearInterval(poller);
+    if (publicStatsSubscription) supabaseClient.removeChannel(publicStatsSubscription);
+  }, { once: true });
 }
 function renderProjects() {
   const wrap = $("#projectGrid"); if (!wrap) return;
@@ -715,7 +739,123 @@ function statusTimelineHTML(status) {
     : "";
   return `<div class="tl">${html}${cancel}</div>`;
 }
-async function renderStatus(id, token) {
+let statusSubscription = null;
+let ratingCountdown = null;
+let orderChatSubscription = null;
+
+function stopStatusWatcher() {
+  if (statusSubscription) supabaseClient?.removeChannel(statusSubscription);
+  statusSubscription = null;
+  if (ratingCountdown) window.clearInterval(ratingCountdown);
+  ratingCountdown = null;
+}
+
+function chatPanelHTML(orderId, role) {
+  return `<section class="order-chat" id="orderChat" data-order="${esc(orderId)}" data-role="${role}">
+    <div class="chat-head"><span><i class="fa-solid fa-comments"></i> Chat Order</span><small>Order #${esc(orderId)} · Real-time</small></div>
+    <div class="chat-list" id="chatList"><div class="chat-empty">Memuat percakapan…</div></div>
+    <form class="chat-form" id="chatForm">
+      <textarea class="area" id="chatInput" maxlength="1000" required placeholder="Tulis pesan untuk ${role === "admin" ? "pelanggan" : "admin"}…"></textarea>
+      <button class="btn btn-primary btn-sm" type="submit"><i class="fa-solid fa-paper-plane"></i> Kirim</button>
+    </form>
+  </section>`;
+}
+function chatMessageHTML(message, role) {
+  const own = message.sender === role;
+  return `<div class="chat-message ${own ? "own" : ""}"><small>${message.sender === "admin" ? "Admin" : "Customer"} · ${new Date(message.created_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</small><div>${esc(message.body)}</div></div>`;
+}
+function renderChatMessages(messages, role) {
+  const list = $("#chatList"); if (!list) return;
+  list.innerHTML = messages.length ? messages.map(m => chatMessageHTML(m, role)).join("") : `<div class="chat-empty">Belum ada pesan. Mulai chat untuk Order #${esc($("#orderChat")?.dataset.order || "")}.</div>`;
+  list.scrollTop = list.scrollHeight;
+}
+async function initOrderChat(order, token, role) {
+  if (orderChatSubscription) { supabaseClient?.removeChannel(orderChatSubscription); orderChatSubscription = null; }
+  const getRpc = role === "admin" ? "get_admin_order_messages" : "get_order_messages";
+  const args = role === "admin" ? { p_id: order.id } : { p_id: order.id, p_tracking_token: token };
+  const { data, error } = await supabaseClient.rpc(getRpc, args);
+  if (error) { renderChatMessages([], role); return; }
+  renderChatMessages(data || [], role);
+  const channelName = `order-chat:${order.id}:${token}`;
+  orderChatSubscription = supabaseClient.channel(channelName)
+    .on("broadcast", { event: "new_message" }, ({ payload }) => {
+      const list = $("#chatList"); if (!list) return;
+      list.insertAdjacentHTML("beforeend", chatMessageHTML(payload, role)); list.scrollTop = list.scrollHeight;
+    }).subscribe();
+  const form = $("#chatForm"); if (!form) return;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const input = $("#chatInput"), body = input.value.trim(); if (!body) return;
+    const sendRpc = role === "admin" ? "send_admin_order_message" : "send_customer_order_message";
+    const sendArgs = role === "admin" ? { p_id: order.id, p_body: body } : { p_id: order.id, p_tracking_token: token, p_body: body };
+    const { error: sendError } = await supabaseClient.rpc(sendRpc, sendArgs);
+    if (sendError) { toast(sendError.message || "Pesan gagal dikirim.", "err"); return; }
+    input.value = "";
+  });
+}
+
+function ratingPanelHTML(order) {
+  if (order.status !== 4 || !order.completedAt) return "";
+  if (order.rating) return `<div class="rating-panel submitted"><i class="fa-solid fa-heart"></i><span>Terima kasih! Penilaian kamu <b>${order.rating}/5</b> sudah diterima.</span></div>`;
+  const expiresAt = new Date(order.completedAt).getTime() + 10 * 60 * 1000;
+  if (Date.now() >= expiresAt) return `<div class="rating-panel expired"><i class="fa-solid fa-clock"></i><span>Waktu untuk memberi penilaian sudah berakhir.</span></div>`;
+  return `<form class="rating-panel" id="ratingForm">
+    <div class="rating-heading"><i class="fa-solid fa-star"></i><span><b>Bagaimana pesananmu?</b><small>Penilaian tersedia selama <strong id="ratingTimer"></strong>.</small></span></div>
+    <div class="rating-stars" role="group" aria-label="Pilih nilai">
+      ${[1, 2, 3, 4, 5].map(n => `<button type="button" class="rating-star" data-rating="${n}" aria-label="${n} bintang"><i class="fa-regular fa-star"></i></button>`).join("")}
+    </div>
+    <textarea class="area" id="ratingReview" maxlength="500" placeholder="Tulis pengalaman kamu (opsional)"></textarea>
+    <button class="btn btn-primary btn-sm" type="submit" disabled id="ratingSubmit"><i class="fa-solid fa-paper-plane"></i> Kirim Penilaian</button>
+  </form>`;
+}
+
+function bindRatingForm(order, token) {
+  const form = $("#ratingForm"); if (!form) return;
+  const expiresAt = new Date(order.completedAt).getTime() + 10 * 60 * 1000;
+  let rating = 0;
+  const refreshTimer = () => {
+    const left = expiresAt - Date.now();
+    const timer = $("#ratingTimer");
+    if (left <= 0) { stopStatusWatcher(); renderStatus(order.id, token, { watch: true }); return; }
+    const min = Math.floor(left / 60000), sec = Math.floor((left % 60000) / 1000);
+    if (timer) timer.textContent = `${min}:${String(sec).padStart(2, "0")} menit lagi`;
+  };
+  refreshTimer();
+  ratingCountdown = window.setInterval(refreshTimer, 1000);
+  $$(".rating-star", form).forEach(btn => btn.addEventListener("click", () => {
+    rating = +btn.dataset.rating;
+    $$(".rating-star", form).forEach(b => {
+      const on = +b.dataset.rating <= rating;
+      b.classList.toggle("on", on); b.innerHTML = `<i class="fa-${on ? "solid" : "regular"} fa-star"></i>`;
+    });
+    $("#ratingSubmit").disabled = false;
+  }));
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submit = $("#ratingSubmit"); submit.disabled = true;
+    const { error } = await supabaseClient.rpc("submit_order_rating", {
+      p_id: order.id, p_tracking_token: token, p_rating: rating,
+      p_review: $("#ratingReview").value.trim(),
+    });
+    if (error) { toast(error.message.includes("10 menit") ? error.message : "Penilaian tidak dapat dikirim. Coba lagi.", "err"); submit.disabled = false; return; }
+    toast("Terima kasih atas penilaianmu!", "ok");
+    renderStatus(order.id, token, { watch: true });
+  });
+}
+
+function watchOrderStatus(id, token) {
+  if (!supabaseClient?.channel) return;
+  statusSubscription = supabaseClient.channel(`order-status:${id}:${token}`)
+    .on("broadcast", { event: "status_updated" }, () => renderStatus(id, token, { watch: true }))
+    .subscribe();
+  // Cadangan bila Realtime belum diaktifkan di proyek Supabase.
+  const poller = window.setInterval(() => renderStatus(id, token, { watch: false }), 15000);
+  window.addEventListener("pagehide", () => window.clearInterval(poller), { once: true });
+}
+
+async function renderStatus(id, token, { watch = false } = {}) {
+  if (ratingCountdown) { window.clearInterval(ratingCountdown); ratingCountdown = null; }
+  if (orderChatSubscription) { supabaseClient?.removeChannel(orderChatSubscription); orderChatSubscription = null; }
   const card = $("#statusCard");
   card.classList.remove("show");
   if (!supabaseClient || !token) {
@@ -728,7 +868,8 @@ async function renderStatus(id, token) {
   const order = row && {
     id: row.id, gameName: row.game_name, serviceName: row.service_name, target: row.target,
     priority: row.priority, price: row.price, est: row.est, status: row.status,
-    createdAt: row.created_at, updatedAt: row.updated_at,
+    createdAt: row.created_at, updatedAt: row.updated_at, completedAt: row.completed_at,
+    rating: row.rating, ratingReview: row.rating_review,
   };
   if (!order) {
     $("#statusBody").innerHTML = `
@@ -759,8 +900,12 @@ async function renderStatus(id, token) {
     ${statusTimelineHTML(s)}
     ${s === 5 ? `<div class="cancel-banner"><i class="fa-solid fa-circle-xmark"></i><span>Order ini <b>dibatalkan</b>. Hubungi customer service bila ada kendala pembayaran.</span></div>` : ""}
     ${s === 0 ? `<div class="pay-note"><i class="fa-solid fa-hand-holding-dollar" style="margin-right:.5rem"></i>Order menunggu pembayaran. Bayar melalui <b>${esc(APPCONFIG.acceptedPayments)}</b> lalu kirim bukti ke customer service untuk konfirmasi.</div>` : ""}
-    ${s === 4 ? `<div class="pay-note" style="border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.08);color:#a7f3d0"><i class="fa-solid fa-circle-check" style="margin-right:.5rem"></i>Order <b>selesai</b>! Terima kasih telah menggunakan FISH JOKI. Jangan lupa beri testimoni ya 🐟</div>` : ""}`;
+    ${s >= 0 && s <= 3 ? chatPanelHTML(order.id, "customer") : ""}
+    ${s === 4 ? `<div class="pay-note" style="border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.08);color:#a7f3d0"><i class="fa-solid fa-circle-check" style="margin-right:.5rem"></i>Order <b>selesai</b>! Terima kasih telah menggunakan FISH JOKI.</div>${ratingPanelHTML(order)}` : ""}`;
   card.classList.add("show");
+  bindRatingForm(order, token);
+  if (s >= 0 && s <= 3) initOrderChat(order, token, "customer");
+  if (watch && !statusSubscription) watchOrderStatus(id, token);
 }
 function initStatusPage() {
   const form = $("#statusForm"); if (!form) return;
@@ -768,11 +913,12 @@ function initStatusPage() {
     e.preventDefault();
     const id = $("#statusId").value.trim();
     if (!id) { toast("Masukkan Order ID terlebih dahulu.", "err"); return; }
-    renderStatus(id, $("#statusToken").value.trim());
+    stopStatusWatcher();
+    renderStatus(id, $("#statusToken").value.trim(), { watch: true });
   });
   const params = new URLSearchParams(location.search);
   const url = params.get("id"), token = params.get("token");
-  if (url && token) { $("#statusId").value = url; $("#statusToken").value = token; renderStatus(url, token); }
+  if (url && token) { $("#statusId").value = url; $("#statusToken").value = token; renderStatus(url, token, { watch: true }); }
 }
 /* =================================================================
    ADMIN — Login
@@ -867,6 +1013,7 @@ function adminStats() {
     ? orders.slice(0, 6).map(o => orderRow(o, true)).join("")
     : `<tr><td colspan="7"><div class="empty"><i class="fa-solid fa-fish"></i>Belum ada order. Order dari sisi customer akan muncul di sini.</div></td></tr>`;
   bindStatusSelects();
+  bindAdminChatButtons();
 }
 function orderRow(o, recent) {
   const meta = GAMES_META[o.game];
@@ -880,6 +1027,7 @@ function orderRow(o, recent) {
       <td>${esc(o.priority)}<br><small style="color:var(--muted-2)">${fmtR(o.price)}</small></td>
       <td><select class="sel st-sel" data-id="${o.id}">${opts}</select></td>
       <td class="a-actions">
+        ${o.status >= 0 && o.status <= 3 ? `<button class="icon-btn green chat-order" data-id="${o.id}" title="Chat Order"><i class="fa-solid fa-comments"></i></button>` : ""}
         ${recent ? "" : `<button class="icon-btn red del-order" data-id="${o.id}" title="Hapus"><i class="fa-solid fa-trash"></i></button>`}
       </td>
     </tr>`;
@@ -891,6 +1039,27 @@ function renderOrdersTable() {
     : `<tr><td colspan="7"><div class="empty"><i class="fa-solid fa-fish"></i>Belum ada order.</div></td></tr>`;
   bindStatusSelects();
   bindDelOrders();
+  bindAdminChatButtons();
+}
+function bindAdminChatButtons() {
+  $$(".chat-order").forEach(btn => btn.addEventListener("click", () => {
+    const order = getOrders().find(o => o.id === btn.dataset.id);
+    if (order) openAdminOrderChat(order);
+  }));
+}
+function openAdminOrderChat(order) {
+  let modal = $("#adminChatModal");
+  if (!modal) {
+    modal = document.createElement("div"); modal.id = "adminChatModal"; modal.className = "modal";
+    document.body.appendChild(modal);
+  }
+  modal.innerHTML = `<div class="modal-card"><div class="modal-head"><h3><i class="fa-solid fa-comments" style="color:var(--cyan)"></i> Chat Order #${esc(order.id)}</h3><button class="modal-x" data-close="adminChatModal"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body">${chatPanelHTML(order.id, "admin")}</div></div>`;
+  modal.classList.add("open"); document.body.style.overflow = "hidden";
+  $("[data-close=adminChatModal]", modal).addEventListener("click", () => {
+    modal.classList.remove("open"); document.body.style.overflow = "";
+    if (orderChatSubscription) { supabaseClient?.removeChannel(orderChatSubscription); orderChatSubscription = null; }
+  });
+  initOrderChat(order, order.trackingToken, "admin");
 }
 function bindStatusSelects() {
   $$(".st-sel").forEach(sel => sel.addEventListener("change", async () => {
@@ -1162,7 +1331,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bindGameCards();
     initOrderButtonsFallback();
   }
-  if (PAGE === "index") { renderStats(); renderProjects(); renderSteps(); renderTestis(); renderFaqs($("#faqList")); }
+  if (PAGE === "index") { renderStats(); initLiveStats(); renderProjects(); renderSteps(); renderTestis(); renderFaqs($("#faqList")); }
   if (PAGE === "layanan") { renderPriceTable("fisch"); }
   if (PAGE === "order") {
     requireCustomerLogin().then(isLoggedIn => { if (isLoggedIn) bindOrderForm(""); });
