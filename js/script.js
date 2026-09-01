@@ -620,9 +620,13 @@ function ensureOrderModal() {
   bindOrderForm("m-");
 }
 function redirectToCustomerLogin() {
-  location.href = "login.html?next=order.html";
+  if (location.pathname.endsWith("/login.html")) return;
+  const url = new URL("login.html", location.href);
+  url.searchParams.set("next", "order.html");
+  location.href = url.href;
 }
 async function requireCustomerLogin() {
+  if (location.pathname.endsWith("/login.html")) return true;
   if (!supabaseClient) {
     toast("Koneksi login belum tersedia. Silakan coba lagi.", "err");
     return false;
@@ -815,10 +819,25 @@ async function initCustomerLogin() {
   });
 }
 async function guardAdmin() {
+  if (!supabaseClient) {
+    toast("Koneksi login admin belum tersedia.", "err");
+    return false;
+  }
   const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session?.user) { location.replace("login.html?error=session"); return false; }
+  if (!session?.user) {
+    const url = new URL("login.html", location.href);
+    url.searchParams.set("error", "session");
+    location.replace(url.href);
+    return false;
+  }
   const { data, error } = await supabaseClient.from("admin_users").select("user_id", { head: false }).eq("user_id", session.user.id).maybeSingle();
-  if (error || !data) { await supabaseClient.auth.signOut(); location.replace("login.html?error=access"); return false; }
+  if (error || !data) {
+    await supabaseClient.auth.signOut();
+    const url = new URL("login.html", location.href);
+    url.searchParams.set("error", "access");
+    location.replace(url.href);
+    return false;
+  }
   return true;
 }
 
