@@ -105,6 +105,8 @@ create policy "authenticated users can create orders"
   with check (customer_id = auth.uid() and status = 0 and created_at > now() - interval '5 minutes');
 
 -- Status hanya dapat dibaca dengan pasangan Order ID + token pelacakan rahasia.
+-- Return type versi lama berbeda, jadi fungsi lama perlu dihapus sebelum dibuat ulang.
+drop function if exists public.get_order_status(text, uuid);
 create or replace function public.get_order_status(p_id text, p_tracking_token uuid)
 returns table (
   id text,
