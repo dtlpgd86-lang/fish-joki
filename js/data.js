@@ -10,9 +10,10 @@ const APPCONFIG = {
   brand: "FISH JOKI",
   tagline: "Target Fishing Kamu, Biar Kami yang Selesaikan.",
   /* ====== KONTAK — ganti sesuai data admin ====== */
-  whatsapp: "6285212345678",                                   // nomor WhatsApp (format internasional tanpa +)
+  whatsapp: "6281229422012",                                   // nomor WhatsApp (format internasional tanpa +)
   whatsappMsg: "Halo FISH JOKI! Saya mau tanya tentang jasa joki Fisch & Fish It! 🎣",
   discord: "https://discord.gg/fishjoki",                      // link server Discord
+  discordUsers: ["crazy0895_26480", "firul0312_36078"],       // akun Discord customer service
   /* ====== ATURAN HARGA ====== */
   expressMultiplier: 1.5,                                      // harga Express = normal x 1.5
   minPrice: 10000,                                             // harga minimum order

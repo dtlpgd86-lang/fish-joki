@@ -178,10 +178,11 @@ function injectNav() {
       <nav class="nav-scrim" id="navScrim"></nav>
       <ul class="nav-links" id="navLinks">
         ${inner}
-        <li class="nav-cta"><a href="order.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-anchor"></i> Order Sekarang</a></li>
+        <li class="nav-cta"><a href="login.html?next=order.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-anchor"></i> Order Sekarang</a></li>
       </ul>
       <div class="nav-right">
-        <a href="order.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-anchor"></i> Order Sekarang</a>
+        <a href="login.html" class="nav-login" aria-label="Masuk"><i class="fa-solid fa-right-to-bracket"></i><span> Masuk</span></a>
+        <a href="login.html?next=order.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-anchor"></i> Order Sekarang</a>
         <button class="ham" id="hamBtn" aria-label="Menu"><span></span><span></span><span></span></button>
       </div>
     </div>`;
@@ -228,18 +229,18 @@ function injectFooter() {
         <div>
           <h5>Layanan Populer</h5>
           <ul>
-            <li><a href="order.html">Farming Coins</a></li>
-            <li><a href="order.html">Leveling</a></li>
-            <li><a href="order.html">Farming Item</a></li>
-            <li><a href="order.html">Farming Quest</a></li>
-            <li><a href="order.html">Custom Request</a></li>
+            <li><a href="login.html?next=order.html">Farming Coins</a></li>
+            <li><a href="login.html?next=order.html">Leveling</a></li>
+            <li><a href="login.html?next=order.html">Farming Item</a></li>
+            <li><a href="login.html?next=order.html">Farming Quest</a></li>
+            <li><a href="login.html?next=order.html">Custom Request</a></li>
           </ul>
         </div>
         <div>
           <h5>Kontak</h5>
           <ul class="contact">
             <li><i class="fa-brands fa-whatsapp"></i><span>WhatsApp<br><b style="color:var(--text)">+${APPCONFIG.whatsapp}</b></span></li>
-            <li><i class="fa-brands fa-discord"></i><span>Discord<br><b style="color:var(--text)">FISH JOKI Support</b></span></li>
+            <li><i class="fa-brands fa-discord"></i><span>Discord<br><b style="color:var(--text)">${APPCONFIG.discordUsers.map(esc).join("<br>")}</b></span></li>
             <li><i class="fa-solid fa-clock"></i><span>Fast Response<br><b style="color:var(--text)">Setiap hari, 09.00–23.00 WIB</b></span></li>
           </ul>
         </div>
@@ -447,13 +448,7 @@ function bindOrderForm(prefix) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session?.user) {
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: "google", options: { redirectTo: window.location.href },
-      });
-      if (error) toast("Login Google gagal: " + esc(error.message), "err", 9000);
-      return;
-    }
+    if (!session?.user) { redirectToCustomerLogin(); return; }
     if (!validateForm(prefix)) { toast("Mohon lengkapi data yang wajib diisi dengan benar.", "err"); return; }
     const data = {
       game: gameSel.value,
@@ -624,7 +619,21 @@ function ensureOrderModal() {
   });
   bindOrderForm("m-");
 }
-function openOrderModal(game, svcId) {
+function redirectToCustomerLogin() {
+  location.href = "login.html?next=order.html";
+}
+async function requireCustomerLogin() {
+  if (!supabaseClient) {
+    toast("Koneksi login belum tersedia. Silakan coba lagi.", "err");
+    return false;
+  }
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.user) return true;
+  redirectToCustomerLogin();
+  return false;
+}
+async function openOrderModal(game, svcId) {
+  if (!await requireCustomerLogin()) return;
   ensureOrderModal();
   const m = $("#orderModal");
   $("#m-game").value = game || "";
@@ -776,6 +785,33 @@ function initAdminLogin() {
     });
     if (error) { toast("Email atau password admin salah.", "err"); return; }
     location.href = "dashboard.html";
+  });
+}
+function getLoginDestination() {
+  const next = new URLSearchParams(location.search).get("next") || "order.html";
+  return /^[a-z0-9_-]+\.html(?:#[a-z0-9_-]+)?$/i.test(next) && !next.startsWith("admin/") ? next : "order.html";
+}
+async function initCustomerLogin() {
+  const button = $("#googleLoginBtn");
+  if (!button) return;
+  if (!supabaseClient) {
+    button.disabled = true;
+    toast("Konfigurasi login belum tersedia.", "err", 7000);
+    return;
+  }
+  const destination = getLoginDestination();
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session?.user) { location.replace(destination); return; }
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan ke Google...';
+    const redirectTo = new URL(`login.html?next=${encodeURIComponent(destination)}`, location.href).href;
+    const { error } = await supabaseClient.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+    if (error) {
+      button.disabled = false;
+      button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v4.1h5.7c-.25 1.32-1.76 3.88-5.7 3.88A6.19 6.19 0 1 1 12 5.81c2.24 0 3.75.96 4.61 1.79l3.14-3.05C17.74 2.67 15.13 1.5 12 1.5A10.5 10.5 0 1 0 22.5 12c0-.7-.08-1.22-.17-1.8H12Z"/></svg> Lanjutkan dengan Google';
+      toast("Login Google gagal: " + esc(error.message), "err", 9000);
+    }
   });
 }
 async function guardAdmin() {
@@ -1096,7 +1132,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (wb) { wb.href = waLink(); wb.target = "_blank"; wb.rel = "noopener"; }
   initLoader();
   initBgFX();
-  if (PAGE !== "admin" && PAGE !== "admin-login") {
+  if (PAGE !== "admin" && PAGE !== "admin-login" && PAGE !== "login") {
     injectNav();
     injectFooter();
   }
@@ -1109,10 +1145,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (PAGE === "index") { renderStats(); renderProjects(); renderSteps(); renderTestis(); renderFaqs($("#faqList")); }
   if (PAGE === "layanan") { renderPriceTable("fisch"); }
-  if (PAGE === "order") { bindOrderForm(""); }
+  if (PAGE === "order") {
+    requireCustomerLogin().then(isLoggedIn => { if (isLoggedIn) bindOrderForm(""); });
+  }
   if (PAGE === "status") initStatusPage();
   if (PAGE === "faq") { renderFaqs($("#faqList")); }
   if (PAGE === "admin-login") initAdminLogin();
+  if (PAGE === "login") initCustomerLogin();
   if (PAGE === "admin") initAdminDashboard();
   initDynamicAnim();
 });
