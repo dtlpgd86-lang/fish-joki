@@ -1,5 +1,5 @@
 /* =====================================================================
-   FISH JOKI — KONFIGURASI DATA & HARGA
+   J&B JOKI — KONFIGURASI DATA & HARGA
    ---------------------------------------------------------------------
    File ini adalah "otak" dari seluruh website.
    ADMIN cukup mengubah angka / teks di bawah ini — perubahan otomatis
@@ -7,11 +7,11 @@
    ===================================================================== */
 
 const APPCONFIG = {
-  brand: "FISH JOKI",
+  brand: "J&B JOKI",
   tagline: "Target Fishing Kamu, Biar Kami yang Selesaikan.",
   /* ====== KONTAK — ganti sesuai data admin ====== */
   whatsapp: "6281229422012",                                   // nomor WhatsApp (format internasional tanpa +)
-  whatsappMsg: "Halo FISH JOKI! Saya mau tanya tentang jasa joki Fisch & Fish It! 🎣",
+  whatsappMsg: "Halo J&B JOKI! Saya mau tanya tentang jasa joki Fisch & Fish It! 🎣",
   discord: "https://discord.gg/fishjoki",                      // link server Discord
   discordUsers: ["crazy0895_26480", "firul0312_36078"],       // akun Discord customer service
   /* ====== ATURAN HARGA ====== */

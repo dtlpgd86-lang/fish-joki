@@ -1,5 +1,5 @@
 /* =====================================================================
-   FISH JOKI — script.js
+   J&B JOKI — script.js
    Interaksi: loader, partikel, navbar, animasi, order, status, admin
    ===================================================================== */
 "use strict";
@@ -23,6 +23,22 @@ const supabaseClient = window.supabase?.createClient(
   SUPABASE_CONFIG.url,
   SUPABASE_CONFIG.publishableKey,
 );
+
+/* ---------- Tema gelap / terang (light theme) ---------- */
+function setTheme(t, save = true) {
+  t = t === "light" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", t);
+  if (save) { try { localStorage.setItem("fj_theme", t); } catch (e) { } }
+  $$(".theme-toggle").forEach(b => {
+    b.innerHTML = t === "light" ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    b.setAttribute("aria-label", t === "light" ? "Ganti ke mode gelap" : "Ganti ke mode terang");
+  });
+}
+const currentTheme = () => document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+function initTheme() {
+  setTheme(currentTheme(), false);
+  $$(".theme-toggle").forEach(b => b.addEventListener("click", () => setTheme(currentTheme() === "light" ? "dark" : "light")));
+}
 
 /* ---------- Data dengan override admin ---------- */
 const getServices = (game) => {
@@ -171,7 +187,7 @@ function injectNav() {
   }).join("");
   host.innerHTML = `
     <div class="container nav-inner">
-      <a href="index.html" class="logo" aria-label="FISH JOKI">
+      <a href="index.html" class="logo" aria-label="J&B JOKI">
         <span class="logo-mark"><i class="fa-solid fa-fish"></i></span>
         <span>FISH <b>JOKI</b></span>
       </a>
@@ -181,6 +197,7 @@ function injectNav() {
         <li class="nav-cta"><a href="login.html?next=order.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-anchor"></i> Order Sekarang</a></li>
       </ul>
       <div class="nav-right">
+        <button class="theme-toggle" aria-label="Ganti tema gelap/terang"><i class="fa-solid fa-moon"></i></button>
         <a href="login.html" class="nav-login" aria-label="Masuk"><i class="fa-solid fa-right-to-bracket"></i><span> Masuk</span></a>
         <a href="login.html?next=order.html" class="btn btn-primary btn-sm"><i class="fa-solid fa-anchor"></i> Order Sekarang</a>
         <button class="ham" id="hamBtn" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -246,7 +263,7 @@ function injectFooter() {
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© <span id="fy"></span> <b>FISH JOKI</b> — All rights reserved.</span>
+        <span>© <span id="fy"></span> <b>J&B JOKI</b> — All rights reserved.</span>
         <span>Tidak berafiliasi dengan Roblox Corporation.</span>
       </div>
     </div>`;
@@ -895,13 +912,13 @@ async function renderStatus(id, token, { watch = false } = {}) {
       <div class="detail-cell"><div class="k">Prioritas</div><div class="v">${esc(order.priority)}</div></div>
       <div class="detail-cell"><div class="k">Estimasi Harga</div><div class="v" style="color:var(--cyan)">${fmtR(order.price)}</div></div>
     </div>
-    ${order.detail ? `<div style="margin-top:1rem;color:var(--muted);font-size:.95rem;background:rgba(4,12,32,.6);border:1px solid var(--stroke);border-radius:14px;padding:.9rem 1rem"><b>Detail tambahan:</b> ${esc(order.detail)}</div>` : ""}
+    ${order.detail ? `<div style="margin-top:1rem;color:var(--muted);font-size:.95rem;background:var(--soft-bg);border:1px solid var(--stroke);border-radius:14px;padding:.9rem 1rem"><b>Detail tambahan:</b> ${esc(order.detail)}</div>` : ""}
     <div style="margin-top:1.4rem;font-family:var(--font-head);font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted-2)">Progres Order</div>
     ${statusTimelineHTML(s)}
     ${s === 5 ? `<div class="cancel-banner"><i class="fa-solid fa-circle-xmark"></i><span>Order ini <b>dibatalkan</b>. Hubungi customer service bila ada kendala pembayaran.</span></div>` : ""}
     ${s === 0 ? `<div class="pay-note"><i class="fa-solid fa-hand-holding-dollar" style="margin-right:.5rem"></i>Order menunggu pembayaran. Bayar melalui <b>${esc(APPCONFIG.acceptedPayments)}</b> lalu kirim bukti ke customer service untuk konfirmasi.</div>` : ""}
     ${s >= 0 && s <= 3 ? chatPanelHTML(order.id, "customer") : ""}
-    ${s === 4 ? `<div class="pay-note" style="border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.08);color:#a7f3d0"><i class="fa-solid fa-circle-check" style="margin-right:.5rem"></i>Order <b>selesai</b>! Terima kasih telah menggunakan FISH JOKI.</div>${ratingPanelHTML(order)}` : ""}`;
+    ${s === 4 ? `<div class="pay-note" style="border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.08);color:var(--green)"><i class="fa-solid fa-circle-check" style="margin-right:.5rem"></i>Order <b>selesai</b>! Terima kasih telah menggunakan J&B JOKI.</div>${ratingPanelHTML(order)}` : ""}`;
   card.classList.add("show");
   bindRatingForm(order, token);
   if (s >= 0 && s <= 3) initOrderChat(order, token, "customer");
@@ -1320,19 +1337,20 @@ document.addEventListener("DOMContentLoaded", () => {
   if (wb) { wb.href = waLink(); wb.target = "_blank"; wb.rel = "noopener"; }
   initLoader();
   initBgFX();
-  if (PAGE !== "admin" && PAGE !== "admin-login" && PAGE !== "login") {
+  if (PAGE !== "admin" && PAGE !== "admin-login" && PAGE !== "login" && !PAGE.startsWith("wa-")) {
     injectNav();
     injectFooter();
   }
+  initTheme();
   observeReveals();
-  if (PAGE === "index" || PAGE === "layanan") {
+  if ((PAGE === "index" || PAGE === "layanan") && !PAGE.startsWith("wa-")) {
     bindServiceTabs();
     activateGame("fisch");
     bindGameCards();
     initOrderButtonsFallback();
   }
-  if (PAGE === "index") { renderStats(); initLiveStats(); renderProjects(); renderSteps(); renderTestis(); renderFaqs($("#faqList")); }
-  if (PAGE === "layanan") { renderPriceTable("fisch"); }
+  if (PAGE === "index" && !PAGE.startsWith("wa-")) { renderStats(); initLiveStats(); renderProjects(); renderSteps(); renderTestis(); renderFaqs($("#faqList")); }
+  if (PAGE === "layanan" && !PAGE.startsWith("wa-")) { renderPriceTable("fisch"); }
   if (PAGE === "order") {
     requireCustomerLogin().then(isLoggedIn => { if (isLoggedIn) bindOrderForm(""); });
   }

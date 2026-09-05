@@ -1,39 +1,56 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <meta name="description" content="FISH JOKI — Jasa joki premium Fisch & Fish It! Farming coins, XP, leveling, item langka, dan custom request. Cepat, aman, dan profesional.">
- <meta name="theme-color" content="#020617">
- <title>FISH JOKI — Jasa Joki Fisch &amp; Fish It! Premium</title>
- <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
- <link rel="preconnect" href="https://fonts.googleapis.com">
- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
- <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
- <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="J&B JOKI — Jasa joki premium Fisch & Fish It! Farming coins, XP, leveling, item langka, dan custom request. Cepat, aman, dan profesional.">
+  <meta name="theme-color" content="#020617">
+  <title>J&B JOKI — Jasa Joki Fisch &amp; Fish It! Premium</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script>try { document.documentElement.setAttribute("data-theme", localStorage.getItem("fj_theme") === "light" ? "light" : "dark") } catch (e) { document.documentElement.setAttribute("data-theme", "dark") }</script>
 </head>
+
 <body data-page="index">
 
   <!-- Loading screen bertema laut -->
- <div class="loader" id="loader">
+  <div class="loader" id="loader">
     <div class="loader-fish">🐟</div>
     <div class="loader-bar"><i></i></div>
-    <div class="loader-text">FISH JOKI — Menyiapkan Laut 🎣</div>
- </div>
- <noscript><div class="noscript">Aktifkan JavaScript untuk pengalaman terbaik di FISH JOKI.</div></noscript>
+    <div class="loader-text">J&B JOKI — Menyiapkan Laut 🎣</div>
+  </div>
+  <noscript>
+    <div class="noscript">Aktifkan JavaScript untuk pengalaman terbaik di J&B JOKI.</div>
+  </noscript>
 
- <main>
+  <main>
     <!-- ================= HERO ================= -->
     <section class="hero" id="home">
       <div class="container">
         <div class="hero-grid">
           <div>
             <span class="hero-badge reveal"><span class="dot"></span> Premium Gaming Service • Trusted</span>
-            <h1 class="reveal d1">Jasa Joki <span class="gtext">Fisch</span> &amp; <span class="gtext">Fish It!</span></h1>
-            <p class="lead reveal d2">Mau ikan langka, uang banyak, atau target tertentu? Pilih layanan dan buat order dengan mudah.</p>
+            <div class="reveal" style="margin-top:1rem">
+              <a href="wa-version/wa-index.html" class="btn btn-success" style="font-size:.92rem;padding:.5rem 1.2rem;border-radius:50px;display:inline-flex;align-items:center;gap:.5rem">
+                <i class="fa-brands fa-whatsapp"></i> Alternatif Order via WhatsApp
+              </a>
+            </div>
+            <h1 class="reveal d1">Jasa Joki <span class="gtext">Fisch</span> &amp; <span class="gtext">Fish It!</span>
+            </h1>
+            <p class="lead reveal d2">Mau ikan langka, uang banyak, atau target tertentu? Pilih layanan dan buat order
+              dengan mudah.</p>
             <div class="hero-cta reveal d3">
-              <a href="login.html?next=order.html" class="btn btn-primary"><i class="fa-solid fa-anchor"></i> Order Sekarang</a>
+              <a href="login.html?next=order.html" class="btn btn-primary"><i class="fa-solid fa-anchor"></i> Order
+                Sekarang</a>
               <a href="#layanan" class="btn btn-ghost"><i class="fa-solid fa-water"></i> Lihat Layanan</a>
             </div>
             <div class="stats reveal d4" id="statsRow"></div>
@@ -57,7 +74,9 @@
           </div>
         </div>
       </div>
-      <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none"><path d="M0,48 C240,90 480,10 720,40 C960,70 1200,20 1440,55 L1440,90 L0,90 Z"></path></svg>
+      <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none">
+        <path d="M0,48 C240,90 480,10 720,40 C960,70 1200,20 1440,55 L1440,90 L0,90 Z"></path>
+      </svg>
     </section>
     <!-- ================= PILIH GAME ================= -->
     <section id="pilih-game">
@@ -68,14 +87,16 @@
           <p>Kami spesialis dua game fishing terpopuler di Roblox. Pilih, lalu langsung tentukan layanannya.</p>
         </div>
         <div class="game-grid">
-          <div class="game-card fisch reveal d1" data-game="fisch" role="button" tabindex="0" aria-label="Pilih game Fisch">
+          <div class="game-card fisch reveal d1" data-game="fisch" role="button" tabindex="0"
+            aria-label="Pilih game Fisch">
             <span class="game-ico"><i class="fa-solid fa-fish"></i></span>
             <h3>FISCH</h3>
             <p>Jasa bantuan untuk berbagai target dan progres di Fisch.</p>
             <span class="btn btn-primary go"><i class="fa-solid fa-water"></i> Lihat Layanan Fisch</span>
             <span class="game-tag"><i class="fa-solid fa-star"></i> POPULER</span>
           </div>
-          <div class="game-card fishit reveal d2" data-game="fishit" role="button" tabindex="0" aria-label="Pilih game Fish It!">
+          <div class="game-card fishit reveal d2" data-game="fishit" role="button" tabindex="0"
+            aria-label="Pilih game Fish It!">
             <span class="game-ico"><i class="fa-solid fa-water"></i></span>
             <h3>FISH IT!</h3>
             <p>Jasa bantuan progres dan target fishing di Fish It!</p>
@@ -113,7 +134,8 @@
         </div>
         <div class="sub-head" id="svcTitle"></div>
         <div class="services-grid" id="servicesGrid"></div>
-        <p class="mini-note reveal"><b>*</b> Harga mulai - estimasi final dihitung otomatis saat order, menyesuaikan target & prioritas.</p>
+        <p class="mini-note reveal"><b>*</b> Harga mulai - estimasi final dihitung otomatis saat order, menyesuaikan
+          target & prioritas.</p>
       </div>
     </section>
     <!-- ================= CARA ORDER ================= -->
@@ -126,7 +148,8 @@
         </div>
         <div class="steps" id="stepsRow"></div>
         <div class="center mt-3 reveal">
-          <a href="login.html?next=order.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Mulai Order Sekarang</a>
+          <a href="login.html?next=order.html" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Mulai
+            Order Sekarang</a>
         </div>
       </div>
     </section>
@@ -166,31 +189,109 @@
           <h2>Butuh Bantuan?</h2>
           <p>Hubungi customer service kami jika memiliki pertanyaan sebelum melakukan order.</p>
           <div class="cta-btns">
-            <a href="#" id="waBtn" class="btn btn-success" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> Chat WhatsApp</a>
-            <a href="#" id="dcBtn" class="btn btn-discord" target="_blank" rel="noopener"><i class="fa-brands fa-discord"></i> Chat Discord</a>
+            <a href="#" id="waBtn" class="btn btn-success" target="_blank" rel="noopener"><i
+                class="fa-brands fa-whatsapp"></i> Chat WhatsApp</a>
+            <a href="#" id="dcBtn" class="btn btn-discord" target="_blank" rel="noopener"><i
+                class="fa-brands fa-discord"></i> Chat Discord</a>
           </div>
         </div>
       </div>
     </section>
- </main>
- <script>
-   // Wire konfigurasi kontak admin
-   document.addEventListener("DOMContentLoaded", function () {
-     var wa = document.getElementById("waBtn");
-     var dc = document.getElementById("dcBtn");
-     if (wa) wa.href = waLink();
-     if (dc) dc.href = APPCONFIG.discord;
-   });
- </script>
- <script src="js/data.js"></script>
- <script src="js/script.js"></script>
-<a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
+  </main>
+  <script>
+    // Wire konfigurasi kontak admin
+    document.addEventListener("DOMContentLoaded", function () {
+      var wa = document.getElementById("waBtn");
+      var dc = document.getElementById("dcBtn");
+      if (wa) wa.href = waLink();
+      if (dc) dc.href = APPCONFIG.discord;
+    });
+  </script>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
     <div class="wa-pulse"></div>
     <div class="wa-banner-btn"><i class="fa-brands fa-whatsapp"></i></div>
     <div class="wa-banner-text">
-        <span class="wa-t">Butuh Bantuan?</span>
-        <span class="wa-s">Chat Customer Service &gt;</span>
+      <span class="wa-t">Butuh Bantuan?</span>
+      <span class="wa-s">Chat Customer Service &gt;</span>
     </div>
-</a>
+  </a>
 </body>
+
+</html>        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    // Wire konfigurasi kontak admin
+    document.addEventListener("DOMContentLoaded", function () {
+      var wa = document.getElementById("waBtn");
+      var dc = document.getElementById("dcBtn");
+      if (wa) wa.href = waLink();
+      if (dc) dc.href = APPCONFIG.discord;
+    });
+  </script>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
+    <div class="wa-pulse"></div>
+    <div class="wa-banner-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    <div class="wa-banner-text">
+      <span class="wa-t">Butuh Bantuan?</span>
+      <span class="wa-s">Chat Customer Service &gt;</span>
+    </div>
+  </a>
+</body>
+
+</html>        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    // Wire konfigurasi kontak admin
+    document.addEventListener("DOMContentLoaded", function () {
+      var wa = document.getElementById("waBtn");
+      var dc = document.getElementById("dcBtn");
+      if (wa) wa.href = waLink();
+      if (dc) dc.href = APPCONFIG.discord;
+    });
+  </script>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
+    <div class="wa-pulse"></div>
+    <div class="wa-banner-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    <div class="wa-banner-text">
+      <span class="wa-t">Butuh Bantuan?</span>
+      <span class="wa-s">Chat Customer Service &gt;</span>
+    </div>
+  </a>
+</body>
+
+</html>        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    // Wire konfigurasi kontak admin
+    document.addEventListener("DOMContentLoaded", function () {
+      var wa = document.getElementById("waBtn");
+      var dc = document.getElementById("dcBtn");
+      if (wa) wa.href = waLink();
+      if (dc) dc.href = APPCONFIG.discord;
+    });
+  </script>
+  <script src="js/data.js"></script>
+  <script src="js/script.js"></script>
+  <a href="#konfigurasi" id="waBanner" class="wa-banner" aria-label="Chat WhatsApp">
+    <div class="wa-pulse"></div>
+    <div class="wa-banner-btn"><i class="fa-brands fa-whatsapp"></i></div>
+    <div class="wa-banner-text">
+      <span class="wa-t">Butuh Bantuan?</span>
+      <span class="wa-s">Chat Customer Service &gt;</span>
+    </div>
+  </a>
+</body>
+
 </html>
